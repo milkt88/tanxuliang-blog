@@ -1,0 +1,33 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={`${post.data.title} — tanxuliang`} description={post.data.description}>
+  <article class="prose prose-invert prose-gray max-w-none">
+    <h1 class="text-2xl font-bold mb-2 text-white">{post.data.title}</h1>
+    <p class="text-sm text-gray-500 mb-6">{post.data.date.toISOString().slice(0, 10)}</p>
+    <Content />
+  </article>
+  <div class="flex gap-2 mt-8">
+    {post.data.tags.map((tag) => (
+      <a
+        href={`${import.meta.env.BASE_URL}tags/${tag}`}
+        class="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded hover:bg-gray-700"
+      >
+        #{tag}
+      </a>
+    ))}
+  </div>
+</BaseLayout>

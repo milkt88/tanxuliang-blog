@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+    },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={`#${tag} — tanxuliang`}>
+  <h1 class="text-2xl font-bold mb-8">#{tag}</h1>
+  <ul class="space-y-8">
+    {posts.map((post) => (
+      <li>
+        <a href={`${base}blog/${post.id}`} class="group">
+          <h2 class="text-lg font-semibold text-white group-hover:text-gray-300">{post.data.title}</h2>
+          <p class="text-sm text-gray-500 mt-1">{post.data.date.toISOString().slice(0, 10)}</p>
+          <p class="text-gray-400 mt-1 text-sm">{post.data.description}</p>
+        </a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

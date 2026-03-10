@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title="tanxuliang's blog">
+  <h1 class="text-2xl font-bold mb-8">Posts</h1>
+  <ul class="space-y-8">
+    {posts.map((post) => (
+      <li>
+        <a href={`${base}blog/${post.id}`} class="group">
+          <h2 class="text-lg font-semibold text-white group-hover:text-gray-300">{post.data.title}</h2>
+          <p class="text-sm text-gray-500 mt-1">
+            {post.data.date.toISOString().slice(0, 10)}
+          </p>
+          <p class="text-gray-400 mt-1 text-sm">{post.data.description}</p>
+          <div class="flex gap-2 mt-2">
+            {post.data.tags.map((tag) => (
+              <a
+                href={`${base}tags/${tag}`}
+                class="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded hover:bg-gray-700"
+                onclick="event.stopPropagation()"
+              >
+                #{tag}
+              </a>
+            ))}
+          </div>
+        </a>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
